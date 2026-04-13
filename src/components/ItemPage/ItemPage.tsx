@@ -1,5 +1,5 @@
 import type { ItemType, ProcessedTokenType } from "../../../scripts/processItem"
-import { Button } from '@mantine/core';
+import { Button, Container, Popover } from '@mantine/core';
 import { Fragment } from "react/jsx-runtime";
 import { useSettings } from "../../stores/settings";
 import { useParams } from "react-router-dom";
@@ -8,6 +8,7 @@ import { loadItem } from "../../catalog/loadItem";
 import { IconHome } from '@tabler/icons-react';
 
 import "./ItemPage.scss"
+import type { SearchResults } from "cc-cedict";
 
 export function ItemPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +43,7 @@ export function ItemPage() {
   if (error) {
     return (
       <div>
-        <div id="settings"><HomeButton/></div>
+        <HomeButton />
         <p>{error}</p>
       </div>
     );
@@ -50,7 +51,7 @@ export function ItemPage() {
   if (!data) {
     return (
       <div>
-        <div id="settings"><HomeButton/></div>
+        <HomeButton />
         <p>No data</p>
       </div>
     );
@@ -58,8 +59,14 @@ export function ItemPage() {
 
   return (
     <div id="item-page">
-      <Settings/>
-      <Item item={data}/>
+      <HomeButton />
+      <br />
+      <br />
+      <Item item={data} />
+      <br />
+      <br />
+      <br />
+      <Settings />
     </div>
   )
 }
@@ -71,47 +78,53 @@ function Settings() {
 
     showTranslation,
     toggleShowTranslation,
+
+    showTraditional,
+    toggleShowTraditional
   } = useSettings();
 
   return (
     <div id="settings">
-      <HomeButton/>
       <Button size="xs" color={showPinyin ? "blue" : "gray"} onClick={() => toggleShowPinyin()}>Pinyin</Button>
       <Button size="xs" color={showTranslation ? "blue" : "gray"} onClick={() => toggleShowTranslation()}>Translations</Button>
+      <Button size="xs" color={showTraditional ? "blue" : "gray"} onClick={() => toggleShowTraditional()}>Traditional</Button>
     </div>
   )
 }
 
-function Item({item}:{item:ItemType}) {
+function Item({ item }: { item: ItemType }) {
   return (
-    <div id="content">
-      <RenderProcessedTokens processedTokens={item.processed.title} translation={item.translation.title}/>
-      <br/>
-      <RenderProcessedTokens processedTokens={item.processed.author} translation={item.translation.author}/>
-      <br/>
-      <RenderProcessedTokens processedTokens={item.processed.content} translation={item.translation.content}/>
-    </div>
+    <Container>
+      <RenderProcessedTokens processedTokens={item.processed.title} translation={item.translation.title} title />
+      <br />
+      <RenderProcessedTokens processedTokens={item.processed.author} translation={item.translation.author} />
+      <br />
+      <RenderProcessedTokens processedTokens={item.processed.content} translation={item.translation.content} />
+    </Container>
   )
 }
 
 function RenderProcessedTokens({
   processedTokens,
+  title,
   translation,
-}:{
-  processedTokens:ProcessedTokenType[][],
+}: {
+  processedTokens: ProcessedTokenType[][],
+  title?: boolean,
   translation: string,
 }) {
   const { showPinyin, showTranslation } = useSettings();
   const translationRows = translation.split("\n");
 
-  if(!showPinyin) {
+  if (!showPinyin) {
+    const Tag = title ? "h1" : "p";
     return (
       <div>
-        {processedTokens.map((row,i) => {
+        {processedTokens.map((row, i) => {
           return (
             <Fragment key={i}>
-              <p>{row.map(([token]) => token)}</p>
-              {showTranslation && <p>{translationRows[i]}</p>}
+              <Tag>{row.map(([token,pinyin,searchResult],j) => <TokenWithPopover key={j} pinyin={pinyin} searchResult={searchResult} token={token}/>)}</Tag>
+              {showTranslation && <p className="translation">{translationRows[i]}</p>}
             </Fragment>
           )
         })}
@@ -119,23 +132,70 @@ function RenderProcessedTokens({
     )
   }
 
-  return (
-    <div>
-      {processedTokens.map((row,i) => {
-        return (
-          <table className="table-row" key={i}>
-            <tbody>
-              <tr>{row.map(([token],j) => <td key={j}>{token}</td>)}</tr>
-              {showPinyin && <tr>{row.map(([_,pinyin],j) => <td key={j} style={{padding:"0 0.5rem"}}>{pinyin}</td>)}</tr>}
-              {showTranslation && <tr><td colSpan={row.length}><p>{translationRows[i]}</p></td></tr>}
-            </tbody>
-          </table>
-        )
-      })}
+  return processedTokens.map((row, i) => (
+    <div key={i} className="table-container">
+      <table className="table-row">
+        <tbody>
+          <tr>{row.map(([token, pinyin, searchResult], j) => (
+            <td key={j}>
+              <TokenWithPopover pinyin={pinyin} searchResult={searchResult} token={token}/>
+            </td>
+          ))}</tr>
+          {showPinyin && <tr>{row.map(([_, pinyin], j) => <td key={j} style={{ padding: "0 0.5rem" }}>{pinyin}</td>)}</tr>}
+          {showTranslation && <tr><td colSpan={row.length}><p>{translationRows[i]}</p></td></tr>}
+        </tbody>
+      </table>
     </div>
-  )
+  ));
 }
 
 function HomeButton() {
-  return <a className="home-button" href="/"><Button size="xs"><IconHome/></Button></a>
+  return <nav className="home-button" ><a href="/"><Button size="xs"><IconHome /></Button></a></nav>
+}
+
+function TokenWithPopover({pinyin,token,searchResult}:{pinyin:string,token:string,searchResult:SearchResults}) {
+  const [opened, setOpened] = useState(false);
+
+  if(searchResult) {
+    const entries = Array.isArray(searchResult) ? searchResult : Object.values(searchResult).flat();
+    return (
+      <Popover withArrow shadow="md" opened={opened} onChange={setOpened}>
+        <Popover.Target>
+          <span className={opened ? "opened" : ""} onClick={() => setOpened((o) => !o)}><Token token={token} searchResult={searchResult}/></span>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <h3><Token token={token} searchResult={searchResult}/></h3>
+          <p>{pinyin}</p>
+          {entries.map((value,k) => {
+            return (
+              <p key={k}>
+                {value.english.join(", ")}
+              </p>
+            );
+          })}
+        </Popover.Dropdown>
+      </Popover>
+    )
+  }
+
+  return <Token token={token} searchResult={searchResult}/>;
+}
+
+function Token({token,searchResult}:{token:string,searchResult:SearchResults}) {
+  const { showTraditional } = useSettings();
+
+  if(searchResult) {
+    try {
+      const entry = Array.isArray(searchResult) ? searchResult[0] : Object.values(searchResult)[0][0];
+      if(showTraditional) {
+        return entry.traditional;
+      }
+      return entry.simplified;
+    }
+    catch(err) {
+      console.error(token);
+    }
+  }
+
+  return token;
 }

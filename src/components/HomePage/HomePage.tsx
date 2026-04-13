@@ -1,4 +1,4 @@
-import { Button } from "@mantine/core";
+import { Button, Container } from "@mantine/core";
 import { catalog, type CatalogType } from "../../catalog/catalog"
 
 const groups = catalog.reduce((acc,item) => {
@@ -12,7 +12,7 @@ const groups = catalog.reduce((acc,item) => {
 
 export function HomePage() {
   return (
-    <div id="content">
+    <Container>
       <h1>Chinese Study App</h1>
       {Object.entries(groups).map(([key,values],i) => (
         <div key={i}>
@@ -20,6 +20,6 @@ export function HomePage() {
           {values.map((v,j) => <a key={j} href={`#/item/${v.name}`}><Button>{v.name}</Button></a>)}
         </div>
       ))}
-    </div>
+    </Container>
   )
 }

@@ -1,24 +1,49 @@
 #item-page {
   text-align: center;
+  position: relative;
 
-
-  #settings {
-    padding: 1rem;
-    background-color: #111;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  table td {
-    text-align: center;
-  }
-  table.table-row {
+  .translation {
     margin-bottom: 1rem;
   }
 
+  .opened {
+    background-color: black;
+    font-weight: bold;
+  }
+
+  #settings {
+    padding: 0.5rem;
+    background-color: #111;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .table-container {
+    display: flex;
+    justify-content: center;
+    table {
+      border-collapse: collapse;
+    }
+    table td {
+      text-align: center;
+    }
+    table.table-row {
+      margin-bottom: 1rem;
+    }
+  }
+
+  
+
   .home-button {
-    margin-right: 3rem;
+    position: absolute;
+
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+
+  h1 {
+    margin: 0;
   }
 }

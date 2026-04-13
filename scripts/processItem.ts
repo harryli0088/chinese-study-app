@@ -52,13 +52,7 @@ function processText(text:string) {
   const output:ProcessedTokenType[][] = [row];
   tokens.forEach(t => {
     if(t.trim()) {
-      // Get pinyin
-      const py = pinyin(t, {
-        style: pinyin.STYLE_TONE,   // e.g. ["nǐ"]
-        heteronym: false,
-      }).flat().join(" ");
-
-      row.push([t,py,cedict.getBySimplified(t)]);
+      lookupWithFallback(row,t)
     }
     else if(t === "\n") {
       row = [];
@@ -70,6 +64,49 @@ function processText(text:string) {
   });
 
   return output;
+}
+
+function lookupWithFallback(row: ProcessedTokenType[], token: string):void {
+  // 1. Try full token
+  let result = cedict.getBySimplified(token);
+  if (result || token.length===1) {
+    if(!result && !["。","，","；","？"].includes(token)) {
+      console.warn(`Could not find a definition for ${token}`)
+    }
+    row.push([
+      token,
+      pinyin(token, { style: pinyin.STYLE_TONE, heteronym: false }).flat().join(" "),
+      result
+    ]);
+    return;
+  }
+
+  // 2. Try splitting with jieba again (finer segmentation)
+  const subTokens = nodejieba.cut(token, true); // true = HMM for finer cut
+  if (subTokens.length > 1) {
+    const subResults = subTokens
+      .map(st => cedict.getBySimplified(st))
+      .filter(Boolean);
+
+    if (subTokens.length === subResults.length) {
+      console.log(`Split ${token} into ${subTokens}`)
+      subTokens.forEach((t,i) => {
+        const result = subResults[i];
+        row.push([
+          t,
+          pinyin(t, { style: pinyin.STYLE_TONE, heteronym: false }).flat().join(" "),
+          result
+        ]);
+      });
+      return;
+    }
+  }
+
+  // 3. Fallback: character-by-character
+  console.log(`Splitting ${token} into individual characters`)
+  token.split("").forEach(t => {
+    lookupWithFallback(row,t)
+  });
 }
 
 

@@ -6,6 +6,9 @@ type SettingsStore = {
 
   showTranslation: boolean,
   toggleShowTranslation: () => void,
+
+  showTraditional: boolean,
+  toggleShowTraditional: () => void,
 }
 
 
@@ -15,6 +18,9 @@ export const useSettings = create<SettingsStore>((set) => ({
 
   showTranslation: false,
   toggleShowTranslation: () => set((state) => ({ showTranslation: !state.showTranslation })),
+
+  showTraditional: false,
+  toggleShowTraditional: () => set((state) => ({ showTraditional: !state.showTraditional })),
 
   // removeAllBears: () => set({ bears: 0 }),
   // updateBears: (newBears) => set({ bears: newBears }),
