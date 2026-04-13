@@ -42,7 +42,7 @@ export function ItemPage() {
   if (error) {
     return (
       <div>
-        <div id="settings"><a href="/"><Button><IconHome/></Button></a></div>
+        <div id="settings"><HomeButton/></div>
         <p>{error}</p>
       </div>
     );
@@ -50,17 +50,17 @@ export function ItemPage() {
   if (!data) {
     return (
       <div>
-        <div id="settings"><a href="/"><Button><IconHome/></Button></a></div>
+        <div id="settings"><HomeButton/></div>
         <p>No data</p>
       </div>
     );
   }
 
   return (
-    <>
+    <div id="item-page">
       <Settings/>
       <Item item={data}/>
-    </>
+    </div>
   )
 }
 
@@ -75,11 +75,9 @@ function Settings() {
 
   return (
     <div id="settings">
-      <a href="/"><Button><IconHome/></Button></a>
-      &nbsp;
-      <Button color={showPinyin ? "blue" : "gray"} onClick={() => toggleShowPinyin()}>Pinyin</Button>
-      &nbsp;
-      <Button color={showTranslation ? "blue" : "gray"} onClick={() => toggleShowTranslation()}>Translations</Button>
+      <HomeButton/>
+      <Button size="xs" color={showPinyin ? "blue" : "gray"} onClick={() => toggleShowPinyin()}>Pinyin</Button>
+      <Button size="xs" color={showTranslation ? "blue" : "gray"} onClick={() => toggleShowTranslation()}>Translations</Button>
     </div>
   )
 }
@@ -136,4 +134,8 @@ function RenderProcessedTokens({
       })}
     </div>
   )
+}
+
+function HomeButton() {
+  return <a className="home-button" href="/"><Button size="xs"><IconHome/></Button></a>
 }
