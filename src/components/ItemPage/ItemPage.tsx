@@ -150,7 +150,7 @@ function RenderProcessedTokens({
 }
 
 function HomeButton() {
-  return <nav className="home-button" ><a href="/"><Button size="xs"><IconHome /></Button></a></nav>
+  return <nav className="home-button" ><a href={import.meta.env.BASE_URL}><Button size="xs"><IconHome /></Button></a></nav>
 }
 
 function TokenWithPopover({pinyin,token,searchResult}:{pinyin:string,token:string,searchResult:SearchResults}) {

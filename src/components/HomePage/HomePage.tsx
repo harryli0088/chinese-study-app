@@ -17,7 +17,7 @@ export function HomePage() {
       {Object.entries(groups).map(([key,values],i) => (
         <div key={i}>
           <h3>{key}</h3>
-          {values.map((v,j) => <a key={j} href={`#/item/${v.name}`}><Button>{v.name}</Button></a>)}
+          {values.map((v,j) => <a key={j} href={`${import.meta.env.BASE_URL}#/item/${v.name}`}><Button>{v.name}</Button></a>)}
         </div>
       ))}
     </Container>
