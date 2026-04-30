@@ -141,7 +141,7 @@ function RenderProcessedTokens({
               <TokenWithPopover pinyin={pinyin} searchResult={searchResult} token={token}/>
             </td>
           ))}</tr>
-          {showPinyin && <tr>{row.map(([_, pinyin], j) => <td key={j} style={{ padding: "0 0.5rem" }}>{pinyin}</td>)}</tr>}
+          {showPinyin && <tr>{row.map(([_, pinyin], j) => <td key={j} style={{ padding: "0 0.25rem" }}>{pinyin}</td>)}</tr>}
           {showTranslation && <tr><td colSpan={row.length}><p>{translationRows[i]}</p></td></tr>}
         </tbody>
       </table>
